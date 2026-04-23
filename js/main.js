@@ -1,3 +1,4 @@
+console.log("main.js 파일이 성공적으로 로드되었습니다! 🚀");
 import { db, auth } from './firebase-config.js';
 import { 
     collection, 
@@ -13,7 +14,10 @@ const customerList = document.getElementById('customerList');
 const addBtn = document.getElementById('addBtn');
 
 // 1. 데이터 저장 (등록 버튼 클릭 시)
-addBtn.onclick = async () => {
+// 기존 addBtn.onclick = async () => { ... } 대신 아래 코드로 수정
+document.getElementById('addBtn').addEventListener('click', async () => {
+    console.log("등록 버튼이 클릭되었습니다!"); // 클릭 확인용 로그
+    
     const name = document.getElementById('custName').value;
     const type = document.getElementById('lizardType').value;
     const grade = document.getElementById('custGrade').value;
@@ -30,15 +34,14 @@ addBtn.onclick = async () => {
             grade: grade,
             timestamp: serverTimestamp()
         });
-        
-        // 입력창 초기화
+        alert("저장 완료!");
         document.getElementById('custName').value = "";
         document.getElementById('lizardType').value = "";
-        console.log("저장 완료!");
     } catch (e) {
-        console.error("저장 실패: ", e);
+        console.error("저장 중 오류 발생:", e);
+        alert("저장 실패! 콘솔창을 확인하세요.");
     }
-};
+});
 
 // 2. 데이터 실시간 불러오기 (화면 업데이트)
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
