@@ -1,4 +1,4 @@
-import { db, auth } from './firebase-config.js';
+import { db, auth } from './firebase-config.js'; //
 import { 
     collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -6,41 +6,40 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-// 1. 관리자 설정 (로그인할 이메일을 소문자로 입력)
-const ADMINS = ["pmr08042002com@gmail.com"]; 
+// 1. 관리자 이메일 설정 (반드시 본인 이메일을 소문자로 입력하세요)
+const ADMINS = ["본인의이메일@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
-// HTML 요소 연결
-const customerList = document.getElementById('customerList');
-const addBtn = document.getElementById('addBtn');
-const authBtn = document.getElementById('authBtn');
-const inputSection = document.querySelector('.input-section');
+const customerList = document.getElementById('customerList'); //
+const addBtn = document.getElementById('addBtn'); //
+const authBtn = document.getElementById('authBtn'); //
+const inputSection = document.querySelector('.input-section'); //
 
-// 2. 인증 상태 감지 (핵심 로직)
+// 2. 인증 상태 감지 (가장 안정적인 방식)
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userEmail = user.email.toLowerCase();
-        console.log("현재 로그인한 계정:", userEmail);
+        console.log("로그인 성공 계정:", userEmail);
 
-        // 관리자 명단에 있는지 확인
         if (ADMINS.includes(userEmail)) {
-            console.log("✅ 관리자 권한 확인됨");
-            inputSection.style.display = "grid"; // 입력창 보이기
+            console.log("✅ 관리자 확인됨");
+            if (inputSection) inputSection.style.display = "grid"; 
             authBtn.innerText = "로그아웃";
         } else {
-            console.warn("⚠️ 일반 사용자 계정입니다.");
-            inputSection.style.display = "none"; // 입력창 숨기기
-            authBtn.innerText = "로그아웃 (권한없음)";
-            alert("관리자 계정이 아닙니다. 데이터 수정이 불가능합니다.");
+            console.warn("⚠️ 관리자 권한 없음");
+            // 튕김 방지: signOut()을 호출하지 않고 UI만 숨깁니다.
+            if (inputSection) inputSection.style.display = "none";
+            authBtn.innerText = "로그아웃 (일반사용자)";
+            alert("관리자 목록에 등록되지 않은 이메일입니다.");
         }
     } else {
         console.log("ℹ️ 로그아웃 상태");
-        inputSection.style.display = "none";
+        if (inputSection) inputSection.style.display = "none";
         authBtn.innerText = "관리자 로그인";
     }
 });
 
-// 3. 로그인/로그아웃 버튼 클릭 이벤트
+// 3. 로그인/로그아웃 동작 (팝업 방식 고정)
 authBtn.onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) {
@@ -48,11 +47,11 @@ authBtn.onclick = async () => {
         }
     } else {
         try {
-            // 팝업 방식으로 로그인 시도
+            // 404 에러를 유발하는 리다이렉트 대신 팝업만 사용
             await signInWithPopup(auth, provider);
         } catch (error) {
             console.error("로그인 에러:", error);
-            alert("로그인 창을 불러오지 못했습니다.");
+            alert("로그인 중 오류가 발생했습니다. (승인된 도메인 확인 필요)");
         }
     }
 };
@@ -64,7 +63,7 @@ addBtn.addEventListener('click', async () => {
     const grade = document.getElementById('custGrade').value;
 
     if (!name || !type) {
-        alert("내용을 모두 입력해주세요! 🦎");
+        alert("내용을 입력해주세요! 🦎");
         return;
     }
 
@@ -74,16 +73,16 @@ addBtn.addEventListener('click', async () => {
             timestamp: serverTimestamp(),
             manager: auth.currentUser.email
         });
-        alert("성공적으로 등록되었습니다!");
+        alert("등록 완료!");
         document.getElementById('custName').value = "";
         document.getElementById('lizardType').value = "";
     } catch (e) {
-        console.error("저장 에러:", e);
+        console.error("저장 실패:", e);
         alert("데이터베이스 저장 권한이 없습니다.");
     }
 });
 
-// 5. 실시간 리스트 출력
+// 5. 리스트 출력 (실시간)
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
 onSnapshot(q, (snapshot) => {
     if (customerList) {
