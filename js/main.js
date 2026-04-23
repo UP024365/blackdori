@@ -85,11 +85,11 @@ if (addBuyerBtn) {
     };
 }
 
-// 6. 개체(도마뱀) 등록 (코드 자동 생성)
+// 6. 개체(도마뱀) 등록 및 수정
 const addLizardBtn = document.getElementById('addLizardBtn');
 if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
-        const yearPrefix = document.getElementById('lizardYear').value; // 추가된 연도 칸
+        const yearPrefix = document.getElementById('lizardYear').value; // 연도 칸
         const morph = document.getElementById('morph').value;
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
@@ -100,7 +100,6 @@ if (addLizardBtn) {
         try {
             if (editingLizardId) {
                 // 수정 모드
-                const fullCode = `${yearPrefix}${morph} (수정됨)`; // 코드는 생성 규칙에 따라 재계산 가능
                 await updateDoc(doc(db, "lizards", editingLizardId), {
                     yearPrefix, morph, parents: { father: fId, mother: mId }, owner
                 });
@@ -128,7 +127,15 @@ if (addLizardBtn) {
     };
 }
 
-// 개체 수정 시작 함수 (전역 등록)
+// 7. 수정 모드 시작 함수 (전역 등록)
+window.startEdit = (id, name, grade) => {
+    editingId = id;
+    document.getElementById('custName').value = name;
+    document.getElementById('custGrade').value = grade;
+    document.getElementById('addBuyerBtn').innerText = "수정 하기";
+    window.scrollTo(0, 0);
+};
+
 window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     editingLizardId = id;
     document.getElementById('lizardYear').value = year || "";
@@ -140,8 +147,35 @@ window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     const btn = document.getElementById('addLizardBtn');
     if (btn) btn.innerText = "개체 정보 수정";
     window.scrollTo(0, 0);
+}; // <--- 이 중괄호가 빠져있었습니다!
 
-// 7. 실시간 데이터 출력 (구매자/개체)
+// 8. 실시간 데이터 출력 (구매자/개체)
+// (1) 구매자 리스트 출력
+onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (snap) => {
+    const list = document.getElementById('customerList');
+    const select = document.getElementById('buyerSelect');
+    if (list) list.innerHTML = "";
+    if (select) select.innerHTML = '<option value="">구매자 선택</option>';
+    
+    snap.forEach(doc => {
+        const d = doc.data();
+        if (list) {
+            list.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${d.name}</td>
+                    <td>${d.contact || '-'}</td>
+                    <td>${d.grade}</td>
+                    <td>
+                        <button onclick="startEdit('${doc.id}', '${d.name}', '${d.grade}')" class="btn-edit">수정</button>
+                        <button onclick="deleteData('customers', '${doc.id}')" class="btn-del">삭제</button>
+                    </td>
+                </tr>`);
+        }
+        if (select) select.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+    });
+});
+
+// (2) 개체 리스트 출력
 onSnapshot(query(collection(db, "lizards"), orderBy("timestamp", "desc")), (snap) => {
     const list = document.getElementById('lizardList');
     if (list) list.innerHTML = "";
@@ -162,12 +196,7 @@ onSnapshot(query(collection(db, "lizards"), orderBy("timestamp", "desc")), (snap
     });
 });
 
-// 전역 함수 등록 (삭제/수정)
-window.deleteData = async (col, id) => { if (confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, col, id)); };
-window.startEdit = (id, name, grade) => {
-    editingId = id;
-    document.getElementById('custName').value = name;
-    document.getElementById('custGrade').value = grade;
-    document.getElementById('addBuyerBtn').innerText = "수정 하기";
-    window.scrollTo(0, 0);
+// 9. 삭제 함수
+window.deleteData = async (col, id) => {
+    if (confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, col, id));
 };
