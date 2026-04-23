@@ -138,16 +138,24 @@ window.startEdit = (id, name, grade) => {
 
 window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     editingLizardId = id;
+    
+    // 1. 입력 필드에 값 채우기
     document.getElementById('lizardYear').value = year || "";
     document.getElementById('morph').value = morph;
     document.getElementById('fatherId').value = fId;
     document.getElementById('motherId').value = mId;
     document.getElementById('buyerSelect').value = owner;
     
+    // 2. 버튼 텍스트 변경
     const btn = document.getElementById('addLizardBtn');
     if (btn) btn.innerText = "개체 정보 수정";
-    window.scrollTo(0, 0);
-}; // <--- 이 중괄호가 빠져있었습니다!
+    
+    // 3. (중요) 개체 관리 섹션으로 화면 전환 및 입력창 보이기
+    showSection('lizardSection'); 
+    
+    // 4. 상단으로 스크롤
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 // 8. 실시간 데이터 출력 (구매자/개체)
 // (1) 구매자 리스트 출력
