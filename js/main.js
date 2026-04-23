@@ -25,12 +25,10 @@ window.showSection = (sectionId) => {
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = 'block';
-        // 탭 메뉴 활성화 시각적 처리
         const activeBtn = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
         if (activeBtn) activeBtn.classList.add('active');
         
-        // 시세 탭 이동 시 기본 6개월 데이터 로드
-        if (sectionId === 'marketSection') updateChartPeriod('6m');
+        // 시세 탭(이제 카페 뷰어) 클릭 시 필요한 로직이 있다면 여기에 작성
     }
 };
 
