@@ -3,13 +3,13 @@ import {
     collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import { 
-    GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged 
+    GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-console.log("main.js 안정화 버전 로드됨! 🚀");
+console.log("main.js 팝업 로그인 버전 로드됨! 🚀");
 
-// 1. 관리자 설정 (반드시 소문자로 작성)
-const ADMINS = ["pmr08042002com@gmail.com", "친구이메일@gmail.com"]; 
+// 1. 관리자 설정 (실제 로그인할 이메일을 소문자로 입력하세요)
+const ADMINS = ["pmr08042002com@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
 // HTML 요소
@@ -18,22 +18,7 @@ const addBtn = document.getElementById('addBtn');
 const authBtn = document.getElementById('authBtn');
 const inputSection = document.querySelector('.input-section');
 
-// 2. 리다이렉트 로그인 결과 처리 (한 번만 실행되도록 설정)
-async function handleRedirect() {
-    try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-            console.log("리다이렉트 로그인 성공:", result.user.email);
-        }
-    } catch (error) {
-        if (error.code !== 'auth/invalid-pending-token') {
-            console.error("인증 처리 중 오류:", error.message);
-        }
-    }
-}
-handleRedirect();
-
-// 3. 인증 상태 감지 (가장 중요한 부분)
+// 2. 인증 상태 감지
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userEmail = user.email.toLowerCase();
@@ -45,7 +30,7 @@ onAuthStateChanged(auth, (user) => {
             authBtn.innerText = "로그아웃";
         } else {
             console.warn("⚠️ 권한 없는 사용자");
-            alert("관리자 권한이 없습니다.");
+            alert("관리자 권한이 없습니다. 등록된 이메일로 로그인해주세요.");
             signOut(auth);
         }
     } else {
@@ -55,20 +40,26 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 4. 로그인/로그아웃 버튼 동작
+// 3. 로그인/로그아웃 버튼 동작 (팝업 방식 적용)
 authBtn.onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) {
             await signOut(auth);
-            location.href = location.origin + location.pathname; // 깔끔하게 첫 화면으로 이동
+            location.reload(); // 상태 초기화를 위해 새로고침
         }
     } else {
-        // 팝업 대신 리다이렉트 사용 (COOP 에러 방지)
-        signInWithRedirect(auth, provider);
+        try {
+            // 리다이렉트 대신 팝업창 사용 (404 에러 방지)
+            await signInWithPopup(auth, provider);
+            console.log("로그인 성공!");
+        } catch (error) {
+            console.error("로그인 실패:", error.message);
+            alert("로그인 중 오류가 발생했습니다: " + error.message);
+        }
     }
 };
 
-// 5. 데이터 저장
+// 4. 데이터 저장
 addBtn.addEventListener('click', async () => {
     const name = document.getElementById('custName').value;
     const type = document.getElementById('lizardType').value;
@@ -90,11 +81,11 @@ addBtn.addEventListener('click', async () => {
         document.getElementById('lizardType').value = "";
     } catch (e) {
         console.error("저장 실패:", e);
-        alert("저장 권한이 없습니다.");
+        alert("저장 권한이 없거나 오류가 발생했습니다.");
     }
 });
 
-// 6. 실시간 리스트 출력
+// 5. 실시간 리스트 출력
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
 onSnapshot(q, (snapshot) => {
     if (customerList) {
