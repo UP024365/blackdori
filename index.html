@@ -5,24 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackdori - 통합 관리 시스템</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 <body>
+
     <div class="admin-container">
         <header>
             <h1>🦎 Blackdori 관리 시스템</h1>
-            <button id="authBtn">로그인</button>
+            <button id="authBtn">관리자 로그인</button>
         </header>
 
         <nav class="tab-menu">
-            <button onclick="showSection('buyerSection')">구매자 관리</button>
+            <button onclick="showSection('buyerSection')" class="active">구매자 관리</button>
             <button onclick="showSection('lizardSection')">개체 관리</button>
             <button onclick="showSection('marketSection')">시세 정보</button>
         </nav>
 
         <section id="buyerSection" class="content-section">
-            <div class="input-section">
+            <div class="input-section" style="display: none;">
                 <input type="text" id="custName" placeholder="구매자 성함">
-                <input type="text" id="custContact" placeholder="연락처">
+                <input type="text" id="custContact" placeholder="연락처 (010-0000-0000)">
                 <select id="custGrade">
                     <option value="C">C 등급 (신규)</option>
                     <option value="B">B 등급 (일반)</option>
@@ -31,37 +34,72 @@
                 </select>
                 <button id="addBuyerBtn">구매자 등록</button>
             </div>
-            <table id="buyerTable">
-                <thead><tr><th>이름</th><th>연락처</th><th>등급</th><th>관리</th></tr></thead>
-                <tbody id="customerList"></tbody>
-            </table>
+
+            <div class="list-section">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>연락처</th>
+                            <th>등급</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerList">
+                        </tbody>
+                </table>
+            </div>
         </section>
 
-        <section id="lizardSection" class="content-section" style="display:none;">
-            <div class="input-section">
+        <section id="lizardSection" class="content-section" style="display: none;">
+            <div class="input-section" style="display: none;">
                 <input type="text" id="morph" placeholder="모프 (예: BMD)">
-                <input type="number" id="fatherId" placeholder="아버지 ID">
-                <input type="number" id="motherId" placeholder="어머니 ID">
+                <input type="text" id="fatherId" placeholder="부 개체 ID">
+                <input type="text" id="motherId" placeholder="모 개체 ID">
                 <select id="buyerSelect">
-                    <option value="">구매자 선택 (연동)</option>
+                    <option value="">구매자 연동 (선택)</option>
                 </select>
                 <button id="addLizardBtn">개체 등록</button>
             </div>
-            <table id="lizardTable">
-                <thead><tr><th>고유 코드</th><th>모프</th><th>부/모</th><th>소유주</th><th>관리</th></tr></thead>
-                <tbody id="lizardList"></tbody>
-            </table>
+
+            <div class="list-section">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>고유 코드</th>
+                            <th>모프</th>
+                            <th>부/모</th>
+                            <th>소유주</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lizardList">
+                        </tbody>
+                </table>
+            </div>
         </section>
 
-        <section id="marketSection" class="content-section" style="display:none;">
-            <div style="margin-bottom: 20px;">
-                <button onclick="updateChart(6)">6개월</button>
-                <button onclick="updateChart(3)">3개월</button>
-                <button onclick="updateChart(1)">1개월</button>
+        <section id="marketSection" class="content-section" style="display: none;">
+            <div class="chart-container" style="background: white; padding: 20px; border-radius: 15px;">
+                <h2 style="font-size: 1.1rem; margin-bottom: 20px;">📈 최근 6개월 시세 변동 (평균)</h2>
+                <canvas id="marketChart"></canvas>
             </div>
-            <canvas id="marketChart" width="400" height="200"></canvas>
+            <p style="font-size: 0.8rem; color: #888; margin-top: 15px; text-align: center;">
+                * 시세 정보는 네이버 카페 데이터를 기반으로 업데이트됩니다.
+            </p>
         </section>
     </div>
+
     <script type="module" src="./js/main.js"></script>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-menu button');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
