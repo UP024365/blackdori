@@ -1,4 +1,3 @@
-console.log("main.js 파일이 성공적으로 로드되었습니다! 🚀");
 import { db, auth } from './firebase-config.js';
 import { 
     collection, 
@@ -8,22 +7,65 @@ import {
     onSnapshot, 
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { 
+    GoogleAuthProvider, 
+    signInWithPopup, 
+    signOut, 
+    onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+console.log("main.js 파일이 성공적으로 로드되었습니다! 🚀");
+
+// 1. 관리자 설정 (종윤님과 친구분 이메일 입력)
+const ADMINS = ["종윤님계정@gmail.com", "친구계정@gmail.com"]; 
+const provider = new GoogleAuthProvider();
 
 // HTML 요소 가져오기
 const customerList = document.getElementById('customerList');
 const addBtn = document.getElementById('addBtn');
+const authBtn = document.getElementById('authBtn');
+const inputSection = document.querySelector('.input-section');
 
-// 1. 데이터 저장 (등록 버튼 클릭 시)
-// 기존 addBtn.onclick = async () => { ... } 대신 아래 코드로 수정
-document.getElementById('addBtn').addEventListener('click', async () => {
-    console.log("등록 버튼이 클릭되었습니다!"); // 클릭 확인용 로그
+// 2. 관리자 로그인/로그아웃 로직
+authBtn.onclick = async () => {
+    if (auth.currentUser) {
+        await signOut(auth);
+        alert("로그아웃 되었습니다.");
+    } else {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (e) {
+            console.error("로그인 실패:", e);
+        }
+    }
+};
+
+// 3. 인증 상태 감지 (관리자 확인 및 UI 제어)
+onAuthStateChanged(auth, (user) => {
+    if (user && ADMINS.includes(user.email)) {
+        console.log("관리자 접속 확인 🦎");
+        if (inputSection) inputSection.style.display = "grid"; 
+        authBtn.innerText = "로그아웃";
+    } else {
+        console.log("일반 방문자 모드");
+        if (inputSection) inputSection.style.display = "none";
+        authBtn.innerText = "관리자 로그인";
+        if (user && !ADMINS.includes(user.email)) {
+            alert("관리자 권한이 없는 계정입니다.");
+        }
+    }
+});
+
+// 4. 데이터 저장 (관리자만 가능)
+addBtn.addEventListener('click', async () => {
+    console.log("등록 버튼 클릭됨");
     
     const name = document.getElementById('custName').value;
     const type = document.getElementById('lizardType').value;
     const grade = document.getElementById('custGrade').value;
 
     if (!name || !type) {
-        alert("이름과 도마뱀 종류를 입력해주세요! 🦎");
+        alert("정보를 모두 입력해주세요! 🦎");
         return;
     }
 
@@ -32,23 +74,22 @@ document.getElementById('addBtn').addEventListener('click', async () => {
             name: name,
             type: type,
             grade: grade,
-            timestamp: serverTimestamp()
+            timestamp: serverTimestamp(),
+            manager: auth.currentUser.email // 누가 등록했는지 기록
         });
         alert("저장 완료!");
         document.getElementById('custName').value = "";
         document.getElementById('lizardType').value = "";
     } catch (e) {
-        console.error("저장 중 오류 발생:", e);
-        alert("저장 실패! 콘솔창을 확인하세요.");
+        console.error("저장 오류:", e);
+        alert("권한이 없거나 오류가 발생했습니다.");
     }
 });
 
-// 2. 데이터 실시간 불러오기 (화면 업데이트)
+// 5. 데이터 실시간 불러오기
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
-
 onSnapshot(q, (snapshot) => {
-    customerList.innerHTML = ""; // 기존 리스트 비우기
-    
+    customerList.innerHTML = "";
     snapshot.forEach((doc) => {
         const data = doc.data();
         const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "방금 전";
