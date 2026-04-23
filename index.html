@@ -3,34 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackdori 테스트 페이지</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Blackdori - 도마뱀 관리 시스템</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body>
 
-    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full mx-4">
-        <h1 class="text-3xl font-bold text-gray-800 mb-4">Blackdori Project</h1>
-        <p class="text-gray-600 mb-6">GitHub Pages 배포 테스트 중입니다.</p>
-        
-        <button id="testBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 w-full">
-            연결 테스트 클릭!
-        </button>
+    <div class="admin-container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="font-size: 1.5rem; font-weight: 800;">🦎 도마뱀 분양 관리</h1>
+            <button id="authBtn" style="background: none; border: 1px solid #ddd; padding: 5px 15px; border-radius: 20px; cursor: pointer;">로그인</button>
+        </header>
 
-        <div id="status" class="mt-4 text-sm text-green-600 font-medium hidden">
-            ✅ 자바스크립트 연결 성공!
-        </div>
+        <section class="input-section">
+            <input type="text" id="custName" placeholder="구매자 성함">
+            <input type="text" id="lizardType" placeholder="도마뱀 종류 (예: 크레)">
+            <select id="custGrade">
+                <option value="C">C 등급 (신규)</option>
+                <option value="B">B 등급 (일반)</option>
+                <option value="A">A 등급 (단골)</option>
+                <option value="S">S 등급 (VVIP)</option>
+            </select>
+            <button id="addBtn">신규 등록</button>
+        </section>
+
+        <section class="list-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>이름</th>
+                        <th>종류</th>
+                        <th>등급</th>
+                        <th>등록일</th>
+                    </tr>
+                </thead>
+                <tbody id="customerList">
+                    <tr>
+                        <td>홍길동</td>
+                        <td>레오파드 게코</td>
+                        <td><span class="grade-S">S</span></td>
+                        <td>2026-04-23</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </div>
 
     <script type="module" src="js/main.js"></script>
-    
-    <script>
-        // 간단한 로컬 테스트용 (main.js 연결 확인용)
-        document.getElementById('testBtn').addEventListener('click', function() {
-            document.getElementById('status').classList.remove('hidden');
-            this.innerText = "작동 확인 완료";
-            this.classList.replace('bg-blue-600', 'bg-green-500');
-        });
-    </script>
 </body>
 </html>
