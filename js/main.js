@@ -9,7 +9,7 @@ import {
 console.log("main.js 안정화 버전 로드됨! 🚀");
 
 // 1. 관리자 설정 (반드시 소문자로 작성)
-const ADMINS = ["종윤님이메일@gmail.com", "친구이메일@gmail.com"]; 
+const ADMINS = ["pmr08042002com@gmail.com", "친구이메일@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
 // HTML 요소
