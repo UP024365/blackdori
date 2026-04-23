@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
 // 1. 관리자 이메일 설정 (반드시 본인 이메일을 소문자로 입력하세요)
-const ADMINS = ["본인의이메일@gmail.com"]; 
+const ADMINS = ["pmr08042002com@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
 const customerList = document.getElementById('customerList'); //
