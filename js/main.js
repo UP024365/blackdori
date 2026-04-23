@@ -6,67 +6,65 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-console.log("main.js SPA(단일 페이지) 버전 로드됨! ✨");
-
-// 1. 관리자 설정 (본인 이메일로 수정하세요)
-const ADMINS = ["종윤님이메일@gmail.com"]; 
+// 1. 관리자 설정 (로그인할 이메일을 소문자로 입력)
+const ADMINS = ["pmr08042002com@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
-// HTML 요소
+// HTML 요소 연결
 const customerList = document.getElementById('customerList');
 const addBtn = document.getElementById('addBtn');
 const authBtn = document.getElementById('authBtn');
 const inputSection = document.querySelector('.input-section');
 
-// 2. 인증 상태 감지 (새로고침 없이 UI를 자동으로 업데이트합니다)
+// 2. 인증 상태 감지 (핵심 로직)
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userEmail = user.email.toLowerCase();
-        console.log("로그인 계정:", userEmail);
+        console.log("현재 로그인한 계정:", userEmail);
 
+        // 관리자 명단에 있는지 확인
         if (ADMINS.includes(userEmail)) {
             console.log("✅ 관리자 권한 확인됨");
-            if (inputSection) inputSection.style.display = "grid"; 
+            inputSection.style.display = "grid"; // 입력창 보이기
             authBtn.innerText = "로그아웃";
         } else {
-            console.warn("⚠️ 권한 없는 사용자");
-            alert("관리자 권한이 없습니다.");
-            signOut(auth);
+            console.warn("⚠️ 일반 사용자 계정입니다.");
+            inputSection.style.display = "none"; // 입력창 숨기기
+            authBtn.innerText = "로그아웃 (권한없음)";
+            alert("관리자 계정이 아닙니다. 데이터 수정이 불가능합니다.");
         }
     } else {
-        console.log("ℹ️ 비로그인 상태");
-        // 새로고침 없이 입력창만 숨기고 버튼 텍스트를 바꿉니다.
-        if (inputSection) inputSection.style.display = "none";
+        console.log("ℹ️ 로그아웃 상태");
+        inputSection.style.display = "none";
         authBtn.innerText = "관리자 로그인";
     }
 });
 
-// 3. 로그인/로그아웃 버튼 동작
+// 3. 로그인/로그아웃 버튼 클릭 이벤트
 authBtn.onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) {
-            // signOut만 호출해도 onAuthStateChanged가 감지해서 UI를 바꿔줍니다.
             await signOut(auth);
         }
     } else {
         try {
-            // 팝업 방식을 사용하여 페이지 이동 없이 로그인을 진행합니다.
+            // 팝업 방식으로 로그인 시도
             await signInWithPopup(auth, provider);
         } catch (error) {
-            console.error("인증 에러:", error);
-            alert("로그인 중 오류가 발생했습니다.");
+            console.error("로그인 에러:", error);
+            alert("로그인 창을 불러오지 못했습니다.");
         }
     }
 };
 
-// 4. 데이터 저장 (저장 후에도 페이지는 그대로 유지됩니다)
+// 4. 데이터 저장 로직
 addBtn.addEventListener('click', async () => {
     const name = document.getElementById('custName').value;
     const type = document.getElementById('lizardType').value;
     const grade = document.getElementById('custGrade').value;
 
     if (!name || !type) {
-        alert("이름과 종류를 입력하세요! 🦎");
+        alert("내용을 모두 입력해주세요! 🦎");
         return;
     }
 
@@ -76,18 +74,16 @@ addBtn.addEventListener('click', async () => {
             timestamp: serverTimestamp(),
             manager: auth.currentUser.email
         });
-        alert("등록 완료!");
-        
-        // 입력 칸만 비워줍니다.
+        alert("성공적으로 등록되었습니다!");
         document.getElementById('custName').value = "";
         document.getElementById('lizardType').value = "";
     } catch (e) {
-        console.error("저장 실패:", e);
-        alert("저장 권한이 없습니다.");
+        console.error("저장 에러:", e);
+        alert("데이터베이스 저장 권한이 없습니다.");
     }
 });
 
-// 5. 실시간 리스트 출력 (데이터가 변하면 자동으로 표만 업데이트됩니다)
+// 5. 실시간 리스트 출력
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
 onSnapshot(q, (snapshot) => {
     if (customerList) {
