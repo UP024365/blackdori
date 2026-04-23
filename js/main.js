@@ -6,10 +6,10 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-console.log("main.js 팝업 로그인 버전 로드됨! 🚀");
+console.log("main.js SPA(단일 페이지) 버전 로드됨! ✨");
 
-// 1. 관리자 설정 (실제 로그인할 이메일을 소문자로 입력하세요)
-const ADMINS = ["pmr08042002com@gmail.com"]; 
+// 1. 관리자 설정 (본인 이메일로 수정하세요)
+const ADMINS = ["종윤님이메일@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
 // HTML 요소
@@ -18,7 +18,7 @@ const addBtn = document.getElementById('addBtn');
 const authBtn = document.getElementById('authBtn');
 const inputSection = document.querySelector('.input-section');
 
-// 2. 인증 상태 감지
+// 2. 인증 상태 감지 (새로고침 없이 UI를 자동으로 업데이트합니다)
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const userEmail = user.email.toLowerCase();
@@ -30,36 +30,36 @@ onAuthStateChanged(auth, (user) => {
             authBtn.innerText = "로그아웃";
         } else {
             console.warn("⚠️ 권한 없는 사용자");
-            alert("관리자 권한이 없습니다. 등록된 이메일로 로그인해주세요.");
+            alert("관리자 권한이 없습니다.");
             signOut(auth);
         }
     } else {
         console.log("ℹ️ 비로그인 상태");
+        // 새로고침 없이 입력창만 숨기고 버튼 텍스트를 바꿉니다.
         if (inputSection) inputSection.style.display = "none";
         authBtn.innerText = "관리자 로그인";
     }
 });
 
-// 3. 로그인/로그아웃 버튼 동작 (팝업 방식 적용)
+// 3. 로그인/로그아웃 버튼 동작
 authBtn.onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) {
+            // signOut만 호출해도 onAuthStateChanged가 감지해서 UI를 바꿔줍니다.
             await signOut(auth);
-            location.reload(); // 상태 초기화를 위해 새로고침
         }
     } else {
         try {
-            // 리다이렉트 대신 팝업창 사용 (404 에러 방지)
+            // 팝업 방식을 사용하여 페이지 이동 없이 로그인을 진행합니다.
             await signInWithPopup(auth, provider);
-            console.log("로그인 성공!");
         } catch (error) {
-            console.error("로그인 실패:", error.message);
-            alert("로그인 중 오류가 발생했습니다: " + error.message);
+            console.error("인증 에러:", error);
+            alert("로그인 중 오류가 발생했습니다.");
         }
     }
 };
 
-// 4. 데이터 저장
+// 4. 데이터 저장 (저장 후에도 페이지는 그대로 유지됩니다)
 addBtn.addEventListener('click', async () => {
     const name = document.getElementById('custName').value;
     const type = document.getElementById('lizardType').value;
@@ -77,15 +77,17 @@ addBtn.addEventListener('click', async () => {
             manager: auth.currentUser.email
         });
         alert("등록 완료!");
+        
+        // 입력 칸만 비워줍니다.
         document.getElementById('custName').value = "";
         document.getElementById('lizardType').value = "";
     } catch (e) {
         console.error("저장 실패:", e);
-        alert("저장 권한이 없거나 오류가 발생했습니다.");
+        alert("저장 권한이 없습니다.");
     }
 });
 
-// 5. 실시간 리스트 출력
+// 5. 실시간 리스트 출력 (데이터가 변하면 자동으로 표만 업데이트됩니다)
 const q = query(collection(db, "customers"), orderBy("timestamp", "desc"));
 onSnapshot(q, (snapshot) => {
     if (customerList) {
