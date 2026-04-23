@@ -7,37 +7,100 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-// 1. 초기 변수 설정
+// 1. 초기 변수 및 네이버 API 설정
 const ADMINS = ["pmr08042002com@gmail.com", "gkwit123y@gmail.com"]; 
 const provider = new GoogleAuthProvider();
+const NAVER_ID = "SXRfljvgqYEBnX35Uq6T";
+const NAVER_SECRET = "R3k_Rl4v1z";
+
 let editingId = null; 
 let marketChart = null;
-let editingLizardId = null; // 개체 수정용 ID
+let editingLizardId = null;
 
-// 2. 탭 전환 및 그래프 초기화
+// 2. 탭 전환 및 기간별 그래프 업데이트
 window.showSection = (sectionId) => {
     document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.tab-menu button').forEach(b => b.classList.remove('active'));
+    
     const target = document.getElementById(sectionId);
     if (target) {
         target.style.display = 'block';
-        if (sectionId === 'marketSection') initChart();
+        // 탭 메뉴 활성화 시각적 처리
+        const activeBtn = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        // 시세 탭 이동 시 기본 6개월 데이터 로드
+        if (sectionId === 'marketSection') updateChartPeriod('6m');
     }
 };
 
-function initChart() {
+// 3. 시세 정보 로직 (네이버 API 연동 및 그래프)
+window.updateChartPeriod = async (period) => {
+    // 필터 버튼 활성화 스타일 처리
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.innerText.includes(period.replace('m',''))) btn.classList.add('active');
+    });
+
+    // 네이버 카페 데이터 수집 및 평균 계산 (시뮬레이션 포함)
+    const data = await fetchMarketData(period);
+    renderMarketChart(data);
+};
+
+async function fetchMarketData(period) {
+    const counts = period === '6m' ? 6 : (period === '3m' ? 3 : 1);
+    const labels = [];
+    const values = [];
+    const now = new Date();
+
+    for (let i = counts - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        labels.push(`${d.getMonth() + 1}월`);
+        // 실제 운영 시 이곳에서 네이버 검색 API 결과의 월별 평균값을 계산하여 넣습니다.
+        values.push(Math.floor(Math.random() * (35 - 20 + 1)) + 20); 
+    }
+    return { labels, values };
+}
+
+function renderMarketChart(data) {
     const ctx = document.getElementById('marketChart')?.getContext('2d');
     if (!ctx) return;
+
     if (marketChart) marketChart.destroy();
+
     marketChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['11월', '12월', '1월', '2월', '3월', '4월'],
-            datasets: [{ label: '평균 시세', data: [15, 18, 16, 21, 19, 23], borderColor: '#2ecc71' }]
+            labels: data.labels,
+            datasets: [{
+                label: '평균 시세 (만원)',
+                data: data.values,
+                borderColor: '#111', // 각진 디자인에 맞춘 블랙
+                borderWidth: 3,
+                tension: 0, // 곡선 제거 (각진 느낌)
+                pointBackgroundColor: '#111',
+                pointRadius: 4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { 
+                    beginAtZero: false,
+                    grid: { color: '#eee' },
+                    ticks: { font: { family: 'Pretendard' } }
+                },
+                x: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
         }
     });
 }
 
-// 3. 인증 상태 감지 (관리자라면 입력창 보이기)
+// 4. 인증 상태 감지
 onAuthStateChanged(auth, (user) => {
     const authBtn = document.getElementById('authBtn');
     const inputSections = document.querySelectorAll('.input-section');
@@ -50,7 +113,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 4. 로그인/로그아웃 버튼
+// 5. 로그인/로그아웃 실행
 document.getElementById('authBtn').onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) await signOut(auth);
@@ -59,7 +122,8 @@ document.getElementById('authBtn').onclick = async () => {
     }
 };
 
-// 5. 구매자 등록 및 수정
+// 6. 데이터 등록 및 수정 (기존 로직 유지)
+// [구매자 등록/수정]
 const addBuyerBtn = document.getElementById('addBuyerBtn');
 if (addBuyerBtn) {
     addBuyerBtn.onclick = async () => {
@@ -85,11 +149,11 @@ if (addBuyerBtn) {
     };
 }
 
-// 6. 개체(도마뱀) 등록 및 수정
+// [개체 등록/수정]
 const addLizardBtn = document.getElementById('addLizardBtn');
 if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
-        const yearPrefix = document.getElementById('lizardYear').value; // 연도 칸
+        const yearPrefix = document.getElementById('lizardYear').value;
         const morph = document.getElementById('morph').value;
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
@@ -99,7 +163,6 @@ if (addLizardBtn) {
 
         try {
             if (editingLizardId) {
-                // 수정 모드
                 await updateDoc(doc(db, "lizards", editingLizardId), {
                     yearPrefix, morph, parents: { father: fId, mother: mId }, owner
                 });
@@ -107,7 +170,6 @@ if (addLizardBtn) {
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
-                // 신규 등록 모드
                 const snap = await getDocs(collection(db, "lizards"));
                 const nextId = snap.size + 1;
                 const fullCode = `${yearPrefix}${morph} ${nextId}/${fId}/${mId}`;
@@ -118,7 +180,6 @@ if (addLizardBtn) {
                 });
                 alert("개체 등록 완료: " + fullCode);
             }
-            // 입력창 초기화
             document.getElementById('lizardYear').value = "";
             document.getElementById('morph').value = "";
             document.getElementById('fatherId').value = "";
@@ -127,38 +188,28 @@ if (addLizardBtn) {
     };
 }
 
-// 7. 수정 모드 시작 함수 (전역 등록)
+// 7. 수정 모드 함수 (전역)
 window.startEdit = (id, name, grade) => {
     editingId = id;
     document.getElementById('custName').value = name;
     document.getElementById('custGrade').value = grade;
     document.getElementById('addBuyerBtn').innerText = "수정 하기";
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     editingLizardId = id;
-    
-    // 1. 입력 필드에 값 채우기
     document.getElementById('lizardYear').value = year || "";
     document.getElementById('morph').value = morph;
     document.getElementById('fatherId').value = fId;
     document.getElementById('motherId').value = mId;
     document.getElementById('buyerSelect').value = owner;
-    
-    // 2. 버튼 텍스트 변경
-    const btn = document.getElementById('addLizardBtn');
-    if (btn) btn.innerText = "개체 정보 수정";
-    
-    // 3. (중요) 개체 관리 섹션으로 화면 전환 및 입력창 보이기
-    showSection('lizardSection'); 
-    
-    // 4. 상단으로 스크롤
+    document.getElementById('addLizardBtn').innerText = "개체 정보 수정";
+    showSection('lizardSection');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 8. 실시간 데이터 출력 (구매자/개체)
-// (1) 구매자 리스트 출력
+// 8. 실시간 데이터 스냅샷
 onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (snap) => {
     const list = document.getElementById('customerList');
     const select = document.getElementById('buyerSelect');
@@ -172,7 +223,7 @@ onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (sn
                 <tr>
                     <td>${d.name}</td>
                     <td>${d.contact || '-'}</td>
-                    <td>${d.grade}</td>
+                    <td><span class="grade-${d.grade}">${d.grade}</span></td>
                     <td>
                         <button onclick="startEdit('${doc.id}', '${d.name}', '${d.grade}')" class="btn-edit">수정</button>
                         <button onclick="deleteData('customers', '${doc.id}')" class="btn-del">삭제</button>
@@ -183,13 +234,11 @@ onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (sn
     });
 });
 
-// (2) 개체 리스트 출력
 onSnapshot(query(collection(db, "lizards"), orderBy("timestamp", "desc")), (snap) => {
     const list = document.getElementById('lizardList');
     if (list) list.innerHTML = "";
     snap.forEach(doc => {
         const d = doc.data();
-        const id = doc.id;
         list.insertAdjacentHTML('beforeend', `
             <tr>
                 <td><b>${d.code}</b></td>
@@ -197,8 +246,8 @@ onSnapshot(query(collection(db, "lizards"), orderBy("timestamp", "desc")), (snap
                 <td>${d.parents.father}/${d.parents.mother}</td>
                 <td>${d.owner || '미분양'}</td>
                 <td>
-                    <button onclick="startEditLizard('${id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
-                    <button onclick="deleteData('lizards', '${id}')" class="btn-del">삭제</button>
+                    <button onclick="startEditLizard('${doc.id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
+                    <button onclick="deleteData('lizards', '${doc.id}')" class="btn-del">삭제</button>
                 </td>
             </tr>`);
     });

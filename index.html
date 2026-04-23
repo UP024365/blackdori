@@ -72,6 +72,11 @@
         </section>
 
         <section id="marketSection" class="content-section" style="display: none;">
+            <div class="filter-menu">
+                <button onclick="updateChartPeriod('1m')" class="filter-btn">1개월</button>
+                <button onclick="updateChartPeriod('3m')" class="filter-btn">3개월</button>
+                <button onclick="updateChartPeriod('6m')" class="filter-btn active">6개월</button>
+            </div>
             <div class="chart-container">
                 <canvas id="marketChart"></canvas>
             </div>

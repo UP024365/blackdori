@@ -1,7 +1,7 @@
-/* 전체 레이아웃 수정 */
+/* --- 전체 레이아웃 (각진 디자인) --- */
 body {
     font-family: 'Pretendard', sans-serif;
-    background-color: #ffffff; /* 더 깨끗한 화이트 배경 */
+    background-color: #ffffff;
     color: #111;
     margin: 0;
     padding: 40px 20px;
@@ -10,14 +10,12 @@ body {
 .admin-container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 0; /* 내부 패딩 제거하고 섹션별로 관리 */
     background: white;
-    border-radius: 0; /* 각진 모서리 */
-    box-shadow: none; /* 그림자 제거 */
-    border: 2px solid #111; /* 두꺼운 검정 테두리로 포인트 */
+    border: 2px solid #111; /* 두꺼운 검정 테두리 */
+    border-radius: 0; /* 모서리 곡률 제거 */
 }
 
-/* 헤더 스타일 */
+/* --- 헤더 스타일 --- */
 header {
     display: flex;
     justify-content: space-between;
@@ -29,17 +27,16 @@ header {
 
 header h1 {
     font-size: 1.2rem;
+    font-weight: 900;
     letter-spacing: -0.5px;
     text-transform: uppercase;
+    margin: 0;
 }
 
-/* 탭 메뉴 - 각진 디자인 */
+/* --- 메인 탭 메뉴 --- */
 .tab-menu {
     display: flex;
-    gap: 0; /* 간격 제거 */
-    margin-bottom: 0;
     border-bottom: 2px solid #111;
-    padding-bottom: 0;
 }
 
 .tab-menu button {
@@ -48,9 +45,10 @@ header h1 {
     border: none;
     border-right: 1px solid #111;
     background: white;
-    border-radius: 0;
-    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: bold;
     color: #666;
+    border-radius: 0;
 }
 
 .tab-menu button:last-child {
@@ -62,13 +60,10 @@ header h1 {
     color: white;
 }
 
-/* 입력 영역 - 심플 & 보더 강조 */
+/* --- 입력 영역 (그리드 스타일) --- */
 .input-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0;
-    margin: 0;
-    padding: 0;
     border-bottom: 2px solid #111;
 }
 
@@ -78,28 +73,66 @@ input, select {
     border-right: 1px solid #eee;
     border-radius: 0;
     font-size: 0.9rem;
+    outline: none;
 }
 
 input:focus, select:focus {
     background-color: #f0fdf4;
 }
 
-/* 버튼 - 강조색과 각진 모서리 */
-#addBtn, #addBuyerBtn, #addLizardBtn {
+/* --- 버튼 공통 스타일 --- */
+button {
+    cursor: pointer;
+    font-family: 'Pretendard', sans-serif;
+    transition: all 0.2s;
+    border-radius: 0;
+}
+
+#authBtn {
+    background: white;
+    border: 1px solid #111;
+    padding: 8px 15px;
+    font-size: 0.8rem;
+}
+
+#addBuyerBtn, #addLizardBtn {
     background-color: #111;
     color: white;
     border: none;
-    border-radius: 0;
     padding: 15px;
-    transition: background 0.2s;
 }
 
-#addBtn:hover, #addBuyerBtn:hover, #addLizardBtn:hover {
+#addBuyerBtn:hover, #addLizardBtn:hover {
     background-color: #444;
-    transform: none; /* 애니메이션 제거 */
 }
 
-/* 표 디자인 - 미니멀리즘 */
+/* --- 시세 정보 필터 버튼 (추가됨) --- */
+.filter-menu {
+    display: flex;
+    border-bottom: 1px solid #111;
+}
+
+.filter-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-right: 1px solid #eee;
+    background: #fff;
+    font-weight: bold;
+    color: #666;
+}
+
+.filter-btn:last-child {
+    border-right: none;
+}
+
+.filter-btn.active {
+    background: #f1f5f9;
+    color: #111;
+    text-decoration: underline;
+}
+
+/* --- 표(Table) 디자인 --- */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -117,11 +150,20 @@ th {
 td {
     padding: 15px;
     border-bottom: 1px solid #eee;
+    text-align: center;
 }
 
-/* 등급 뱃지 - 사각형 형태 */
-.grade-S, .grade-A, .grade-B, .grade-C {
-    border-radius: 0;
-    padding: 2px 8px;
-    font-size: 0.75rem;
+/* --- 등급별 색상 (각진 뱃지) --- */
+.grade-S { background-color: #FFD700; color: #000; padding: 2px 8px; font-weight: bold; }
+.grade-A { background-color: #A020F0; color: #fff; padding: 2px 8px; }
+.grade-B { background-color: #1E90FF; color: #fff; padding: 2px 8px; }
+.grade-C { background-color: #808080; color: #fff; padding: 2px 8px; }
+
+/* --- 차트 컨테이너 --- */
+.chart-container {
+    padding: 40px 20px;
+}
+
+canvas {
+    max-width: 100%;
 }
