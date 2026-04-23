@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackdori - 도마뱀 관리 시스템</title>
-    
     <link rel="icon" href="data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMUlEQVQ4T2NkYGAQYcAP3M3Az4AF4GI058EDGCmAVDMGBv7NC9ID6fREoB7A9BAF7AAAFG8Y0S4Z69AAAAAASUVORK5CYII=">
-    
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <link rel="stylesheet" href="style.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
     <div class="admin-container">
         <header>
             <h1>🦎 BLACKDORI SYSTEM</h1>
@@ -21,12 +17,12 @@
         </header>
 
         <nav class="tab-menu">
-            <button onclick="showSection('buyerSection')" class="active">구매자 관리</button>
+            <button onclick="showSection('buyerSection')">구매자 관리</button>
             <button onclick="showSection('lizardSection')">개체 관리</button>
-            <button onclick="showSection('marketSection')">시세 정보</button>
+            <button onclick="showSection('marketSection')" class="active">카페 바로가기</button>
         </nav>
 
-        <section id="buyerSection" class="content-section">
+        <section id="buyerSection" class="content-section" style="display: none;">
             <div class="input-section" style="display: none;">
                 <input type="text" id="custName" placeholder="구매자 성함">
                 <input type="text" id="custContact" placeholder="연락처">
@@ -48,55 +44,31 @@
 
         <section id="lizardSection" class="content-section" style="display: none;">
             <div class="input-section" style="display: none;">
-                <input type="text" id="lizardYear" placeholder="연도/구분 (예: 2026)">
-                <input type="text" id="morph" placeholder="모프 (BMD 등)">
-                <input type="text" id="fatherId" placeholder="부 개체 번호">
-                <input type="text" id="motherId" placeholder="모 개체 번호">
-                <select id="buyerSelect">
-                    <option value="">구매자 연동</option>
-                </select>
+                <input type="text" id="lizardYear" placeholder="연도 (예: 2026)">
+                <input type="text" id="morph" placeholder="모프명">
+                <input type="text" id="fatherId" placeholder="부 개체">
+                <input type="text" id="motherId" placeholder="모 개체">
+                <select id="buyerSelect"><option value="">구매자 연동</option></select>
                 <button id="addLizardBtn">개체 등록</button>
             </div>
             <table>
                 <thead>
-                    <tr>
-                        <th>고유 코드</th>
-                        <th>모프</th>
-                        <th>부/모</th>
-                        <th>소유주</th>
-                        <th>관리</th> 
-                    </tr>
+                    <tr><th>고유 코드</th><th>모프</th><th>부/모</th><th>소유주</th><th>관리</th></tr>
                 </thead>
                 <tbody id="lizardList"></tbody>
             </table>
         </section>
 
-        <section id="marketSection" class="content-section" style="display: none;">
-            <div class="cafe-header">
-                <span>파충류 매니아 실시간 판매글</span>
-                <a href="https://xn--9m1b023b.com/category/Lizard/30/" target="_blank" class="external-link">전체화면으로 보기 ↗</a>
-            </div>
-            <div class="cafe-viewer-container">
-                <iframe 
-                    src="https://xn--9m1b023b.com/category/Lizard/30/" 
-                    id="cafeIframe"
-                    style="width: 100%; height: 800px; border: none;"
-                    title="Naver Cafe Viewer">
-                </iframe>
+        <section id="marketSection" class="content-section">
+            <div class="cafe-link-card">
+                <h2>파충류 매니아 카페</h2>
+                <p>최신 분양글과 시세 정보를 카페에서 확인하세요.</p>
+                <button onclick="window.open('https://cafe.naver.com/reptilia', '_blank')" class="go-cafe-btn">
+                    카페 방문하기 ↗
+                </button>
             </div>
         </section>
     </div>
-
     <script type="module" src="./js/main.js"></script>
-    <script>
-        // 탭 활성화 시각적 처리
-        const tabButtons = document.querySelectorAll('.tab-menu button');
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-    </script>
 </body>
 </html>
