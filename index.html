@@ -50,5 +50,13 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
+    <script>
+        console.log("HTML은 정상 작동 중입니다!");
+        window.onload = () => {
+            const btn = document.getElementById('addBtn');
+            if (btn) console.log("버튼을 찾았습니다!");
+            else console.error("버튼을 찾을 수 없습니다. HTML 구조를 확인하세요.");
+        };
+    </script>
 </body>
 </html>
