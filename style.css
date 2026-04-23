@@ -1,19 +1,20 @@
-/* 전체 레이아웃 */
+/* 전체 레이아웃 수정 */
 body {
-    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
+    font-family: 'Pretendard', sans-serif;
+    background-color: #ffffff; /* 더 깨끗한 화이트 배경 */
+    color: #111;
     margin: 0;
-    padding: 20px;
+    padding: 40px 20px;
 }
 
 .admin-container {
-    max-width: 1000px;
-    margin: 40px auto;
-    padding: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0; /* 내부 패딩 제거하고 섹션별로 관리 */
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border-radius: 0; /* 각진 모서리 */
+    box-shadow: none; /* 그림자 제거 */
+    border: 2px solid #111; /* 두꺼운 검정 테두리로 포인트 */
 }
 
 /* 헤더 스타일 */
@@ -21,155 +22,106 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    padding: 20px 30px;
+    border-bottom: 2px solid #111;
+    background-color: #f8fafc;
 }
 
 header h1 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
 }
 
-/* 탭 메뉴 디자인 */
+/* 탭 메뉴 - 각진 디자인 */
 .tab-menu {
     display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    border-bottom: 2px solid #f1f5f9;
-    padding-bottom: 15px;
+    gap: 0; /* 간격 제거 */
+    margin-bottom: 0;
+    border-bottom: 2px solid #111;
+    padding-bottom: 0;
 }
 
 .tab-menu button {
-    padding: 10px 20px;
+    flex: 1;
+    padding: 15px;
     border: none;
-    background: #f8fafc;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #64748b;
-    transition: all 0.2s;
+    border-right: 1px solid #111;
+    background: white;
+    border-radius: 0;
+    font-size: 0.9rem;
+    color: #666;
 }
 
-.tab-menu button:hover {
-    background: #e2e8f0;
-    color: #333;
+.tab-menu button:last-child {
+    border-right: none;
 }
 
 .tab-menu button.active {
-    background: #2ecc71;
+    background: #111;
     color: white;
 }
 
-/* 입력 영역 스타일 */
+/* 입력 영역 - 심플 & 보더 강조 */
 .input-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: #f8fafc;
-    border-radius: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    border-bottom: 2px solid #111;
 }
 
 input, select {
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    outline: none;
-    transition: border-color 0.2s;
+    padding: 15px;
+    border: none;
+    border-right: 1px solid #eee;
+    border-radius: 0;
+    font-size: 0.9rem;
 }
 
 input:focus, select:focus {
-    border-color: #2ecc71;
+    background-color: #f0fdf4;
 }
 
-/* 버튼 공통 스타일 */
-button {
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.2s;
-}
-
+/* 버튼 - 강조색과 각진 모서리 */
 #addBtn, #addBuyerBtn, #addLizardBtn {
-    padding: 12px;
-    background-color: #2ecc71;
+    background-color: #111;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 0;
+    padding: 15px;
+    transition: background 0.2s;
 }
 
 #addBtn:hover, #addBuyerBtn:hover, #addLizardBtn:hover {
-    background-color: #27ae60;
-    transform: translateY(-1px);
+    background-color: #444;
+    transform: none; /* 애니메이션 제거 */
 }
 
-/* 등급별 뱃지 스타일 */
-.grade-S { background-color: #FFD700; color: #000; font-weight: bold; border-radius: 6px; padding: 4px 12px; }
-.grade-A { background-color: #A020F0; color: #fff; border-radius: 6px; padding: 4px 12px; }
-.grade-B { background-color: #1E90FF; color: #fff; border-radius: 6px; padding: 4px 12px; }
-.grade-C { background-color: #808080; color: #fff; border-radius: 6px; padding: 4px 12px; }
-
-/* 표 디자인 */
+/* 표 디자인 - 미니멀리즘 */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
 }
 
 th {
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
     padding: 15px;
-    border-bottom: 2px solid #e2e8f0;
-    text-align: center;
-    color: #64748b;
-    font-size: 0.9rem;
+    border-bottom: 1px solid #111;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
 }
 
 td {
     padding: 15px;
-    border-bottom: 1px solid #f1f5f9;
-    text-align: center;
+    border-bottom: 1px solid #eee;
 }
 
-tbody tr:hover {
-    background-color: #f8fafc;
-}
-
-/* 수정/삭제 버튼 */
-.btn-edit {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-    margin-right: 5px;
-}
-
-.btn-del {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 6px;
-}
-
-/* 섹션 전환 애니메이션 */
-.content-section {
-    animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* 그래프 컨테이너 */
-#marketSection {
-    padding: 20px;
-    background: white;
-}
-
-canvas {
-    max-width: 100%;
-    margin-top: 20px;
+/* 등급 뱃지 - 사각형 형태 */
+.grade-S, .grade-A, .grade-B, .grade-C {
+    border-radius: 0;
+    padding: 2px 8px;
+    font-size: 0.75rem;
 }
