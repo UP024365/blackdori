@@ -7,17 +7,14 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-// 1. 초기 변수 및 네이버 API 설정
+// 1. 초기 변수 설정
 const ADMINS = ["pmr08042002com@gmail.com", "gkwit123y@gmail.com"]; 
 const provider = new GoogleAuthProvider();
-const NAVER_ID = "SXRfljvgqYEBnX35Uq6T";
-const NAVER_SECRET = "R3k_Rl4v1z";
 
 let editingId = null; 
-let marketChart = null;
 let editingLizardId = null;
 
-// 2. 탭 전환 및 기간별 그래프 업데이트
+// 2. 탭 전환 기능 (시세 그래프 로직 제거)
 window.showSection = (sectionId) => {
     document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.tab-menu button').forEach(b => b.classList.remove('active'));
@@ -27,78 +24,10 @@ window.showSection = (sectionId) => {
         target.style.display = 'block';
         const activeBtn = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
         if (activeBtn) activeBtn.classList.add('active');
-        
-        // 시세 탭(이제 카페 뷰어) 클릭 시 필요한 로직이 있다면 여기에 작성
     }
 };
 
-// 3. 시세 정보 로직 (네이버 API 연동 및 그래프)
-window.updateChartPeriod = async (period) => {
-    // 필터 버튼 활성화 스타일 처리
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if(btn.innerText.includes(period.replace('m',''))) btn.classList.add('active');
-    });
-
-    // 네이버 카페 데이터 수집 및 평균 계산 (시뮬레이션 포함)
-    const data = await fetchMarketData(period);
-    renderMarketChart(data);
-};
-
-async function fetchMarketData(period) {
-    const counts = period === '6m' ? 6 : (period === '3m' ? 3 : 1);
-    const labels = [];
-    const values = [];
-    const now = new Date();
-
-    for (let i = counts - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        labels.push(`${d.getMonth() + 1}월`);
-        // 실제 운영 시 이곳에서 네이버 검색 API 결과의 월별 평균값을 계산하여 넣습니다.
-        values.push(Math.floor(Math.random() * (35 - 20 + 1)) + 20); 
-    }
-    return { labels, values };
-}
-
-function renderMarketChart(data) {
-    const ctx = document.getElementById('marketChart')?.getContext('2d');
-    if (!ctx) return;
-
-    if (marketChart) marketChart.destroy();
-
-    marketChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: data.labels,
-            datasets: [{
-                label: '평균 시세 (만원)',
-                data: data.values,
-                borderColor: '#111', // 각진 디자인에 맞춘 블랙
-                borderWidth: 3,
-                tension: 0, // 곡선 제거 (각진 느낌)
-                pointBackgroundColor: '#111',
-                pointRadius: 4,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { 
-                    beginAtZero: false,
-                    grid: { color: '#eee' },
-                    ticks: { font: { family: 'Pretendard' } }
-                },
-                x: { grid: { display: false } }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-}
-
-// 4. 인증 상태 감지
+// 3. 인증 상태 감지
 onAuthStateChanged(auth, (user) => {
     const authBtn = document.getElementById('authBtn');
     const inputSections = document.querySelectorAll('.input-section');
@@ -111,7 +40,7 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// 5. 로그인/로그아웃 실행
+// 4. 로그인/로그아웃 실행
 document.getElementById('authBtn').onclick = async () => {
     if (auth.currentUser) {
         if (confirm("로그아웃 하시겠습니까?")) await signOut(auth);
@@ -120,8 +49,7 @@ document.getElementById('authBtn').onclick = async () => {
     }
 };
 
-// 6. 데이터 등록 및 수정 (기존 로직 유지)
-// [구매자 등록/수정]
+// 5. 구매자 등록 및 수정
 const addBuyerBtn = document.getElementById('addBuyerBtn');
 if (addBuyerBtn) {
     addBuyerBtn.onclick = async () => {
@@ -147,7 +75,7 @@ if (addBuyerBtn) {
     };
 }
 
-// [개체 등록/수정]
+// 6. 개체(도마뱀) 등록 및 수정
 const addLizardBtn = document.getElementById('addLizardBtn');
 if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
@@ -207,7 +135,7 @@ window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 8. 실시간 데이터 스냅샷
+// 8. 실시간 데이터 출력 (구매자/개체)
 onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (snap) => {
     const list = document.getElementById('customerList');
     const select = document.getElementById('buyerSelect');
