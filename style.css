@@ -16,6 +16,50 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
+/* 헤더 스타일 */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* 탭 메뉴 디자인 */
+.tab-menu {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.tab-menu button {
+    padding: 10px 20px;
+    border: none;
+    background: #f8fafc;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.tab-menu button:hover {
+    background: #e2e8f0;
+    color: #333;
+}
+
+.tab-menu button.active {
+    background: #2ecc71;
+    color: white;
+}
+
 /* 입력 영역 스타일 */
 .input-section {
     display: grid;
@@ -39,18 +83,22 @@ input:focus, select:focus {
     border-color: #2ecc71;
 }
 
-#addBtn {
-    padding: 12px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 10px;
+/* 버튼 공통 스타일 */
+button {
     cursor: pointer;
     font-weight: bold;
     transition: all 0.2s;
 }
 
-#addBtn:hover {
+#addBtn, #addBuyerBtn, #addLizardBtn {
+    padding: 12px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+#addBtn:hover, #addBuyerBtn:hover, #addLizardBtn:hover {
     background-color: #27ae60;
     transform: translateY(-1px);
 }
@@ -83,8 +131,45 @@ td {
     text-align: center;
 }
 
-/* 마우스 호버 효과 */
 tbody tr:hover {
-    background-color: #f1f5f9;
-    transition: background-color 0.2s;
+    background-color: #f8fafc;
+}
+
+/* 수정/삭제 버튼 */
+.btn-edit {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-right: 5px;
+}
+
+.btn-del {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+/* 섹션 전환 애니메이션 */
+.content-section {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 그래프 컨테이너 */
+#marketSection {
+    padding: 20px;
+    background: white;
+}
+
+canvas {
+    max-width: 100%;
+    margin-top: 20px;
 }
