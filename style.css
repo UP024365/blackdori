@@ -190,25 +190,30 @@ tr:hover {
     margin: 24px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    overflow: hidden;
+    background: white;
     border: 1px solid var(--border-color);
+    /* 아래 속성들이 핵심입니다 */
+    display: flex;
+    flex-direction: column;
+    min-height: 800px; /* 기본 최소 높이 설정 */
+    overflow: visible; /* 내용이 잘리지 않도록 변경 */
 }
 
-/* --- 차트 컨테이너 --- */
-.chart-container {
-    padding: 32px;
+/* 카페 iframe 스타일 */
+.cafe-container iframe {
+    width: 100%;
+    height: 800px; /* 카페가 충분히 보일 수 있는 높이 */
+    border: none;
+    border-radius: 0 0 var(--radius) var(--radius); /* 하단 모서리만 둥글게 */
 }
 
-canvas {
-    max-width: 100%;
+/* 모바일 등 작은 화면 대응 */
+@media (max-width: 768px) {
+    .cafe-container {
+        margin: 10px;
+        min-height: 600px;
+    }
+    .cafe-container iframe {
+        height: 600px;
+    }
 }
-
-/* 수정 및 삭제 버튼 커스텀 */
-.btn-edit, .btn-del {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    margin: 0 2px;
-}
-
-.btn-edit { background: #f1f5f9; border: 1px solid var(--border-color); }
-.btn-del { background: #fee2e2; color: #b91c1c; border: none; }

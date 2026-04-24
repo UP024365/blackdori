@@ -150,65 +150,66 @@ if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
         const yearPrefix = document.getElementById('lizardYear').value;
         const morph = document.getElementById('morph').value;
-        const lizardNumInput = document.getElementById('lizardId').value;
+        const lizardNum = document.getElementById('lizardId').value.trim(); // 수동 입력 값
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
         const owner = document.getElementById('buyerSelect').value;
 
-        if (!yearPrefix || !morph) return alert("연도와 모프를 입력하세요!");
+        // 필수 입력 체크 (번호 포함)
+        if (!yearPrefix || !morph || !lizardNum) {
+            return alert("연도, 모프, 그리고 개체 번호를 모두 입력해주세요!");
+        }
 
         try {
             const snap = await getDocs(collection(db, "lizards"));
-            // 번호를 입력하지 않았을 경우에만 자동 부여 (현재 전체 개수 + 1)
-            const lizardNum = lizardNumInput || (snap.size + 1).toString();
+            const existingDocs = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
             const fullCode = `${yearPrefix}${morph} ${lizardNum}/${fId}/${mId}`;
 
+            // --- 중복 체크: 모프/연도 상관없이 lizardNum이 같은지 확인 ---
+            const isDuplicateNum = existingDocs.some(d => 
+                d.id !== editingLizardId && String(d.lizardNum) === String(lizardNum)
+            );
+
+            if (isDuplicateNum) {
+                return alert(`⚠️ 중복 오류: [${lizardNum}]번은 이미 등록된 번호입니다. 세상에 하나뿐인 번호를 입력해주세요.`);
+            }
+
             if (editingLizardId) {
-                // 수정 모드: 수정 중인 본인의 번호는 제외하고 다른 개체와 번호가 겹치는지 확인
-                const isDuplicateNum = snap.docs.some(doc => 
-                    doc.id !== editingLizardId && String(doc.data().lizardNum) === String(lizardNum)
-                );
-
-                if (isDuplicateNum) {
-                    return alert(`이미 사용 중인 번호입니다: [${lizardNum}]번\n다른 번호를 입력해주세요.`);
-                }
-
+                // 수정 모드
                 await updateDoc(doc(db, "lizards", editingLizardId), {
-                    code: fullCode, yearPrefix, morph, lizardNum, 
-                    parents: { father: fId, mother: mId }, owner
+                    code: fullCode, 
+                    yearPrefix, 
+                    morph, 
+                    lizardNum, 
+                    parents: { father: fId, mother: mId }, 
+                    owner
                 });
-                alert("개체 정보가 수정되었습니다.");
+                alert("정보 수정 완료!");
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
-                // 신규 등록: 전체 데이터 중 입력한 번호(lizardNum)가 이미 존재하는지 확인
-                const isDuplicateNum = snap.docs.some(doc => String(doc.data().lizardNum) === String(lizardNum));
-                
-                if (isDuplicateNum) {
-                    return alert(`이미 사용 중인 번호입니다: [${lizardNum}]번\n번호는 중복될 수 없습니다.`);
-                }
-
+                // 신규 등록
                 await addDoc(collection(db, "lizards"), {
                     code: fullCode, 
                     yearPrefix, 
                     morph, 
                     lizardNum, 
-                    parents: { father: fId, mother: mId },
+                    parents: { father: fId, mother: mId }, 
                     owner, 
                     timestamp: serverTimestamp()
                 });
-                alert("개체 등록 완료: " + fullCode);
+                alert("등록 완료: " + fullCode);
             }
             
-            // 입력 필드 초기화
+            // 필드 초기화
             document.getElementById('lizardYear').value = "";
             document.getElementById('morph').value = "";
             document.getElementById('lizardId').value = "";
             document.getElementById('fatherId').value = "";
             document.getElementById('motherId').value = "";
         } catch (e) { 
-            console.error(e);
-            alert("처리 중 에러가 발생했습니다."); 
+            alert("처리 중 오류가 발생했습니다."); 
         }
     };
 }
