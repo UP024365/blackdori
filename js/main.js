@@ -155,31 +155,54 @@ if (addLizardBtn) {
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
         const owner = document.getElementById('buyerSelect').value;
+
         if (!yearPrefix || !morph) return alert("연도와 모프를 입력하세요!");
+
         try {
             if (editingLizardId) {
+                // 수정 모드일 때는 중복 체크를 건너뛰거나 본인 제외 체크를 할 수 있지만, 
+                // 보통 수정 시에는 코드가 고정이므로 바로 업데이트합니다.
                 await updateDoc(doc(db, "lizards", editingLizardId), {
                     yearPrefix, morph, parents: { father: fId, mother: mId }, owner
                 });
+                alert("개체 정보가 수정되었습니다.");
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
+                // [중복 방지 로직 추가]
                 const snap = await getDocs(collection(db, "lizards"));
                 const nextId = snap.size + 1;
                 const fullCode = `${yearPrefix}${morph} ${nextId}/${fId}/${mId}`;
+
+                // 기존 데이터 중 동일한 코드가 있는지 확인
+                const isDuplicate = snap.docs.some(doc => doc.data().code === fullCode);
+                
+                if (isDuplicate) {
+                    return alert("이미 등록된 고유 코드입니다: " + fullCode);
+                }
+
                 await addDoc(collection(db, "lizards"), {
-                    code: fullCode, yearPrefix, morph, parents: { father: fId, mother: mId },
-                    owner, timestamp: serverTimestamp()
+                    code: fullCode, 
+                    yearPrefix, 
+                    morph, 
+                    parents: { father: fId, mother: mId },
+                    owner, 
+                    timestamp: serverTimestamp()
                 });
+                alert("개체 등록 완료: " + fullCode);
             }
+            
+            // 입력 필드 초기화
             document.getElementById('lizardYear').value = "";
             document.getElementById('morph').value = "";
             document.getElementById('fatherId').value = "";
             document.getElementById('motherId').value = "";
-        } catch (e) { alert("처리 중 에러!"); }
+        } catch (e) { 
+            console.error(e);
+            alert("처리 중 에러가 발생했습니다."); 
+        }
     };
 }
-
 // 8. 수정 모드 함수
 window.startEdit = (id, name, grade) => {
     editingId = id;
