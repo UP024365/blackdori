@@ -51,7 +51,7 @@ document.getElementById('authBtn').onclick = async () => {
     }
 };
 
-// 5. [추가] 검색 및 정렬 렌더링 함수
+// 5. 검색 및 정렬 렌더링 함수
 const renderCustomers = () => {
     const list = document.getElementById('customerList');
     const searchTerm = document.getElementById('buyerSearch')?.value.toLowerCase() || "";
@@ -62,7 +62,6 @@ const renderCustomers = () => {
         (c.contact && c.contact.includes(searchTerm))
     );
 
-    // 정렬 로직
     if (sortVal === "name_asc") {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortVal === "grade_desc") {
@@ -95,7 +94,6 @@ const renderLizards = () => {
         (l.owner && l.owner.toLowerCase().includes(searchTerm))
     );
 
-    // 정렬 및 필터 로직
     if (sortVal === "unassigned") {
         filtered = filtered.filter(l => !l.owner || l.owner === "" || l.owner === "미분양");
     } else if (sortVal === "morph_asc") {
@@ -112,18 +110,18 @@ const renderLizards = () => {
                 <td>${d.parents.father}/${d.parents.mother}</td>
                 <td>${d.owner || '미분양'}</td>
                 <td>
-                    <button onclick="startEditLizard('${d.id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
+                    <button onclick="startEditLizard('${d.id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.lizardNum || ''}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
                     <button onclick="deleteData('lizards', '${d.id}')" class="btn-del">삭제</button>
                 </td>
             </tr>`).join('');
     }
 };
 
-// 6. 이벤트 리스너 연결 (검색창 입력 시 즉시 반영)
-document.getElementById('buyerSearch').addEventListener('input', renderCustomers);
-document.getElementById('buyerSort').addEventListener('change', renderCustomers);
-document.getElementById('lizardSearch').addEventListener('input', renderLizards);
-document.getElementById('lizardSort').addEventListener('change', renderLizards);
+// 6. 이벤트 리스너 연결
+document.getElementById('buyerSearch')?.addEventListener('input', renderCustomers);
+document.getElementById('buyerSort')?.addEventListener('change', renderCustomers);
+document.getElementById('lizardSearch')?.addEventListener('input', renderLizards);
+document.getElementById('lizardSort')?.addEventListener('change', renderLizards);
 
 // 7. 데이터 등록 및 수정 로직
 const addBuyerBtn = document.getElementById('addBuyerBtn');
@@ -152,6 +150,7 @@ if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
         const yearPrefix = document.getElementById('lizardYear').value;
         const morph = document.getElementById('morph').value;
+        const lizardNumInput = document.getElementById('lizardId').value;
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
         const owner = document.getElementById('buyerSelect').value;
@@ -159,24 +158,27 @@ if (addLizardBtn) {
         if (!yearPrefix || !morph) return alert("연도와 모프를 입력하세요!");
 
         try {
+            const snap = await getDocs(collection(db, "lizards"));
+            // 번호를 직접 입력했으면 그 번호를 쓰고, 아니면 자동(현재 개수+1) 부여
+            const lizardNum = lizardNumInput || (snap.size + 1);
+            const fullCode = `${yearPrefix}${morph} ${lizardNum}/${fId}/${mId}`;
+
             if (editingLizardId) {
-                // 수정 모드일 때는 중복 체크를 건너뛰거나 본인 제외 체크를 할 수 있지만, 
-                // 보통 수정 시에는 코드가 고정이므로 바로 업데이트합니다.
+                // 수정 시에는 번호까지 포함하여 업데이트
                 await updateDoc(doc(db, "lizards", editingLizardId), {
-                    yearPrefix, morph, parents: { father: fId, mother: mId }, owner
+                    code: fullCode, 
+                    yearPrefix, 
+                    morph, 
+                    lizardNum,
+                    parents: { father: fId, mother: mId }, 
+                    owner
                 });
                 alert("개체 정보가 수정되었습니다.");
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
-                // [중복 방지 로직 추가]
-                const snap = await getDocs(collection(db, "lizards"));
-                const nextId = snap.size + 1;
-                const fullCode = `${yearPrefix}${morph} ${nextId}/${fId}/${mId}`;
-
-                // 기존 데이터 중 동일한 코드가 있는지 확인
+                // 중복 방지 체크
                 const isDuplicate = snap.docs.some(doc => doc.data().code === fullCode);
-                
                 if (isDuplicate) {
                     return alert("이미 등록된 고유 코드입니다: " + fullCode);
                 }
@@ -185,6 +187,7 @@ if (addLizardBtn) {
                     code: fullCode, 
                     yearPrefix, 
                     morph, 
+                    lizardNum,
                     parents: { father: fId, mother: mId },
                     owner, 
                     timestamp: serverTimestamp()
@@ -195,6 +198,7 @@ if (addLizardBtn) {
             // 입력 필드 초기화
             document.getElementById('lizardYear').value = "";
             document.getElementById('morph').value = "";
+            document.getElementById('lizardId').value = "";
             document.getElementById('fatherId').value = "";
             document.getElementById('motherId').value = "";
         } catch (e) { 
@@ -203,6 +207,7 @@ if (addLizardBtn) {
         }
     };
 }
+
 // 8. 수정 모드 함수
 window.startEdit = (id, name, grade) => {
     editingId = id;
@@ -212,10 +217,11 @@ window.startEdit = (id, name, grade) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.startEditLizard = (id, year, morph, fId, mId, owner) => {
+window.startEditLizard = (id, year, morph, num, fId, mId, owner) => {
     editingLizardId = id;
     document.getElementById('lizardYear').value = year || "";
     document.getElementById('morph').value = morph;
+    document.getElementById('lizardId').value = num || "";
     document.getElementById('fatherId').value = fId;
     document.getElementById('motherId').value = mId;
     document.getElementById('buyerSelect').value = owner;
@@ -228,7 +234,6 @@ window.startEditLizard = (id, year, morph, fId, mId, owner) => {
 onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (snap) => {
     allCustomers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    // 소유주 선택 셀렉트 박스 갱신
     const select = document.getElementById('buyerSelect');
     if (select) {
         select.innerHTML = '<option value="">구매자 선택</option>' + 
