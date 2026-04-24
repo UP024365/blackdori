@@ -1,18 +1,32 @@
-/* --- 전체 레이아웃 (각진 디자인) --- */
+/* --- 현대적인 심플 레이아웃 --- */
+:root {
+    --primary-color: #2563eb;    /* 메인 포인트 블루 */
+    --bg-color: #f8fafc;         /* 전체 배경 회색 */
+    --card-bg: #ffffff;          /* 카드 배경 흰색 */
+    --text-main: #1e293b;        /* 주 텍스트 */
+    --text-muted: #64748b;       /* 부가 텍스트 */
+    --border-color: #e2e8f0;     /* 경계선 색상 */
+    --radius: 12px;              /* 부드러운 모서리 곡률 */
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
 body {
-    font-family: 'Pretendard', sans-serif;
-    background-color: #ffffff;
-    color: #111;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
     margin: 0;
-    padding: 40px 20px;
+    padding: 20px;
+    line-height: 1.6;
 }
 
 .admin-container {
     max-width: 1100px;
-    margin: 0 auto;
-    background: white;
-    border: 2px solid #111; /* 두꺼운 검정 테두리 */
-    border-radius: 0; /* 모서리 곡률 제거 */
+    margin: 40px auto;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 /* --- 헤더 스타일 --- */
@@ -20,116 +34,113 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 30px;
-    border-bottom: 2px solid #111;
-    background-color: #f8fafc;
+    padding: 24px 32px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
 }
 
 header h1 {
-    font-size: 1.2rem;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    text-transform: uppercase;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -0.02em;
     margin: 0;
 }
 
-/* --- 메인 탭 메뉴 --- */
+/* --- 메인 탭 메뉴 (Segmented Control 스타일) --- */
 .tab-menu {
     display: flex;
-    border-bottom: 2px solid #111;
+    background: #f1f5f9;
+    padding: 6px;
+    gap: 4px;
 }
 
 .tab-menu button {
     flex: 1;
-    padding: 15px;
+    padding: 12px;
     border: none;
-    border-right: 1px solid #111;
-    background: white;
+    background: transparent;
     cursor: pointer;
-    font-weight: bold;
-    color: #666;
-    border-radius: 0;
-}
-
-.tab-menu button:last-child {
-    border-right: none;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .tab-menu button.active {
-    background: #111;
-    color: white;
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
 }
 
-/* --- 입력 영역 (그리드 스타일) --- */
+/* --- 입력 영역 (카드 내부 그리드) --- */
 .input-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    border-bottom: 2px solid #111;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 24px;
+    background: #fdfdfd;
+    border-bottom: 1px solid var(--border-color);
 }
 
 input, select {
-    padding: 15px;
-    border: none;
-    border-right: 1px solid #eee;
-    border-radius: 0;
-    font-size: 0.9rem;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input:focus, select:focus {
-    background-color: #f0fdf4;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: white;
 }
 
-/* --- 버튼 공통 스타일 --- */
+/* --- 버튼 스타일 --- */
 button {
     cursor: pointer;
-    font-family: 'Pretendard', sans-serif;
+    font-family: inherit;
+    font-weight: 600;
     transition: all 0.2s;
-    border-radius: 0;
+    border-radius: 8px;
+}
+
+button:active {
+    transform: scale(0.98);
 }
 
 #authBtn {
-    background: white;
-    border: 1px solid #111;
-    padding: 8px 15px;
-    font-size: 0.8rem;
+    background: #f1f5f9;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+}
+
+#authBtn:hover {
+    background: #e2e8f0;
 }
 
 #addBuyerBtn, #addLizardBtn {
-    background-color: #111;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 15px;
+    padding: 12px;
 }
 
 #addBuyerBtn:hover, #addLizardBtn:hover {
-    background-color: #444;
+    opacity: 0.9;
 }
 
-/* --- 시세 정보 필터 버튼 (추가됨) --- */
-.filter-menu {
+/* --- 필터 바 스타일 --- */
+.filter-bar {
     display: flex;
-    border-bottom: 1px solid #111;
-}
-
-.filter-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-right: 1px solid #eee;
-    background: #fff;
-    font-weight: bold;
-    color: #666;
-}
-
-.filter-btn:last-child {
-    border-right: none;
-}
-
-.filter-btn.active {
-    background: #f1f5f9;
-    color: #111;
-    text-decoration: underline;
+    gap: 10px;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
 }
 
 /* --- 표(Table) 디자인 --- */
@@ -139,31 +150,65 @@ table {
 }
 
 th {
-    background-color: #f1f5f9;
-    padding: 15px;
-    border-bottom: 1px solid #111;
-    font-weight: 700;
+    background-color: #f8fafc;
+    padding: 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    font-size: 0.8rem;
-}
-
-td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     text-align: center;
 }
 
-/* --- 등급별 색상 (각진 뱃지) --- */
-.grade-S { background-color: #FFD700; color: #000; padding: 2px 8px; font-weight: bold; }
-.grade-A { background-color: #A020F0; color: #fff; padding: 2px 8px; }
-.grade-B { background-color: #1E90FF; color: #fff; padding: 2px 8px; }
-.grade-C { background-color: #808080; color: #fff; padding: 2px 8px; }
+td {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+tr:hover {
+    background-color: #fafafa;
+}
+
+/* --- 등급별 뱃지 (Pill 스타일) --- */
+[class^="grade-"] {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.grade-S { background-color: #fef3c7; color: #92400e; }
+.grade-A { background-color: #f3e8ff; color: #6b21a8; }
+.grade-B { background-color: #dbeafe; color: #1e40af; }
+.grade-C { background-color: #f1f5f9; color: #475569; }
+
+/* --- 카페 및 컨테이너 스타일 --- */
+.cafe-container {
+    margin: 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
 
 /* --- 차트 컨테이너 --- */
 .chart-container {
-    padding: 40px 20px;
+    padding: 32px;
 }
 
 canvas {
     max-width: 100%;
 }
+
+/* 수정 및 삭제 버튼 커스텀 */
+.btn-edit, .btn-del {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    margin: 0 2px;
+}
+
+.btn-edit { background: #f1f5f9; border: 1px solid var(--border-color); }
+.btn-del { background: #fee2e2; color: #b91c1c; border: none; }
