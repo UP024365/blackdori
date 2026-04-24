@@ -7,14 +7,16 @@ import {
     GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-// 1. 초기 변수 설정
+// 1. 초기 변수 및 데이터 저장소 설정
 const ADMINS = ["pmr08042002com@gmail.com", "gkwit123y@gmail.com"]; 
 const provider = new GoogleAuthProvider();
 
 let editingId = null; 
 let editingLizardId = null;
+let allCustomers = []; // 실시간 구매자 데이터 저장
+let allLizards = [];   // 실시간 개체 데이터 저장
 
-// 2. 탭 전환 기능 (시세 그래프 로직 제거)
+// 2. 탭 전환 기능
 window.showSection = (sectionId) => {
     document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
     document.querySelectorAll('.tab-menu button').forEach(b => b.classList.remove('active'));
@@ -49,25 +51,95 @@ document.getElementById('authBtn').onclick = async () => {
     }
 };
 
-// 5. 구매자 등록 및 수정
+// 5. [추가] 검색 및 정렬 렌더링 함수
+const renderCustomers = () => {
+    const list = document.getElementById('customerList');
+    const searchTerm = document.getElementById('buyerSearch')?.value.toLowerCase() || "";
+    const sortVal = document.getElementById('buyerSort')?.value || "recent";
+
+    let filtered = allCustomers.filter(c => 
+        c.name.toLowerCase().includes(searchTerm) || 
+        (c.contact && c.contact.includes(searchTerm))
+    );
+
+    // 정렬 로직
+    if (sortVal === "name_asc") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortVal === "grade_desc") {
+        const priority = { 'S': 4, 'A': 3, 'B': 2, 'C': 1 };
+        filtered.sort((a, b) => (priority[b.grade] || 0) - (priority[a.grade] || 0));
+    }
+
+    if (list) {
+        list.innerHTML = filtered.map(d => `
+            <tr>
+                <td>${d.name}</td>
+                <td>${d.contact || '-'}</td>
+                <td><span class="grade-${d.grade}">${d.grade}</span></td>
+                <td>
+                    <button onclick="startEdit('${d.id}', '${d.name}', '${d.grade}')" class="btn-edit">수정</button>
+                    <button onclick="deleteData('customers', '${d.id}')" class="btn-del">삭제</button>
+                </td>
+            </tr>`).join('');
+    }
+};
+
+const renderLizards = () => {
+    const list = document.getElementById('lizardList');
+    const searchTerm = document.getElementById('lizardSearch')?.value.toLowerCase() || "";
+    const sortVal = document.getElementById('lizardSort')?.value || "recent";
+
+    let filtered = allLizards.filter(l => 
+        l.morph.toLowerCase().includes(searchTerm) || 
+        l.code.toLowerCase().includes(searchTerm) ||
+        (l.owner && l.owner.toLowerCase().includes(searchTerm))
+    );
+
+    // 정렬 및 필터 로직
+    if (sortVal === "unassigned") {
+        filtered = filtered.filter(l => !l.owner || l.owner === "" || l.owner === "미분양");
+    } else if (sortVal === "morph_asc") {
+        filtered.sort((a, b) => a.morph.localeCompare(b.morph));
+    } else if (sortVal === "name_asc") {
+        filtered.sort((a, b) => (a.owner || "힣").localeCompare(b.owner || "힣"));
+    }
+
+    if (list) {
+        list.innerHTML = filtered.map(d => `
+            <tr>
+                <td><b>${d.code}</b></td>
+                <td>${d.morph}</td>
+                <td>${d.parents.father}/${d.parents.mother}</td>
+                <td>${d.owner || '미분양'}</td>
+                <td>
+                    <button onclick="startEditLizard('${d.id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
+                    <button onclick="deleteData('lizards', '${d.id}')" class="btn-del">삭제</button>
+                </td>
+            </tr>`).join('');
+    }
+};
+
+// 6. 이벤트 리스너 연결 (검색창 입력 시 즉시 반영)
+document.getElementById('buyerSearch').addEventListener('input', renderCustomers);
+document.getElementById('buyerSort').addEventListener('change', renderCustomers);
+document.getElementById('lizardSearch').addEventListener('input', renderLizards);
+document.getElementById('lizardSort').addEventListener('change', renderLizards);
+
+// 7. 데이터 등록 및 수정 로직
 const addBuyerBtn = document.getElementById('addBuyerBtn');
 if (addBuyerBtn) {
     addBuyerBtn.onclick = async () => {
         const name = document.getElementById('custName').value;
         const contact = document.getElementById('custContact').value;
         const grade = document.getElementById('custGrade').value;
-
         if (!name) return alert("이름을 입력하세요!");
-
         try {
             if (editingId) {
                 await updateDoc(doc(db, "customers", editingId), { name, contact, grade });
                 editingId = null;
                 addBuyerBtn.innerText = "구매자 등록";
             } else {
-                await addDoc(collection(db, "customers"), {
-                    name, contact, grade, timestamp: serverTimestamp()
-                });
+                await addDoc(collection(db, "customers"), { name, contact, grade, timestamp: serverTimestamp() });
             }
             document.getElementById('custName').value = "";
             document.getElementById('custContact').value = "";
@@ -75,7 +147,6 @@ if (addBuyerBtn) {
     };
 }
 
-// 6. 개체(도마뱀) 등록 및 수정
 const addLizardBtn = document.getElementById('addLizardBtn');
 if (addLizardBtn) {
     addLizardBtn.onclick = async () => {
@@ -84,37 +155,32 @@ if (addLizardBtn) {
         const fId = document.getElementById('fatherId').value || "0";
         const mId = document.getElementById('motherId').value || "0";
         const owner = document.getElementById('buyerSelect').value;
-
         if (!yearPrefix || !morph) return alert("연도와 모프를 입력하세요!");
-
         try {
             if (editingLizardId) {
                 await updateDoc(doc(db, "lizards", editingLizardId), {
                     yearPrefix, morph, parents: { father: fId, mother: mId }, owner
                 });
-                alert("개체 정보가 수정되었습니다.");
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
                 const snap = await getDocs(collection(db, "lizards"));
                 const nextId = snap.size + 1;
                 const fullCode = `${yearPrefix}${morph} ${nextId}/${fId}/${mId}`;
-
                 await addDoc(collection(db, "lizards"), {
                     code: fullCode, yearPrefix, morph, parents: { father: fId, mother: mId },
                     owner, timestamp: serverTimestamp()
                 });
-                alert("개체 등록 완료: " + fullCode);
             }
             document.getElementById('lizardYear').value = "";
             document.getElementById('morph').value = "";
             document.getElementById('fatherId').value = "";
             document.getElementById('motherId').value = "";
-        } catch (e) { alert("처리 중 에러가 발생했습니다."); }
+        } catch (e) { alert("처리 중 에러!"); }
     };
 }
 
-// 7. 수정 모드 함수 (전역)
+// 8. 수정 모드 함수
 window.startEdit = (id, name, grade) => {
     editingId = id;
     document.getElementById('custName').value = name;
@@ -135,51 +201,25 @@ window.startEditLizard = (id, year, morph, fId, mId, owner) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// 8. 실시간 데이터 출력 (구매자/개체)
+// 9. 실시간 데이터 수신 및 렌더링
 onSnapshot(query(collection(db, "customers"), orderBy("timestamp", "desc")), (snap) => {
-    const list = document.getElementById('customerList');
-    const select = document.getElementById('buyerSelect');
-    if (list) list.innerHTML = "";
-    if (select) select.innerHTML = '<option value="">구매자 선택</option>';
+    allCustomers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     
-    snap.forEach(doc => {
-        const d = doc.data();
-        if (list) {
-            list.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td>${d.name}</td>
-                    <td>${d.contact || '-'}</td>
-                    <td><span class="grade-${d.grade}">${d.grade}</span></td>
-                    <td>
-                        <button onclick="startEdit('${doc.id}', '${d.name}', '${d.grade}')" class="btn-edit">수정</button>
-                        <button onclick="deleteData('customers', '${doc.id}')" class="btn-del">삭제</button>
-                    </td>
-                </tr>`);
-        }
-        if (select) select.innerHTML += `<option value="${d.name}">${d.name}</option>`;
-    });
+    // 소유주 선택 셀렉트 박스 갱신
+    const select = document.getElementById('buyerSelect');
+    if (select) {
+        select.innerHTML = '<option value="">구매자 선택</option>' + 
+            allCustomers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    }
+    renderCustomers();
 });
 
 onSnapshot(query(collection(db, "lizards"), orderBy("timestamp", "desc")), (snap) => {
-    const list = document.getElementById('lizardList');
-    if (list) list.innerHTML = "";
-    snap.forEach(doc => {
-        const d = doc.data();
-        list.insertAdjacentHTML('beforeend', `
-            <tr>
-                <td><b>${d.code}</b></td>
-                <td>${d.morph}</td>
-                <td>${d.parents.father}/${d.parents.mother}</td>
-                <td>${d.owner || '미분양'}</td>
-                <td>
-                    <button onclick="startEditLizard('${doc.id}', '${d.yearPrefix || ''}', '${d.morph}', '${d.parents.father}', '${d.parents.mother}', '${d.owner}')" class="btn-edit">수정</button>
-                    <button onclick="deleteData('lizards', '${doc.id}')" class="btn-del">삭제</button>
-                </td>
-            </tr>`);
-    });
+    allLizards = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderLizards();
 });
 
-// 9. 삭제 함수
+// 10. 삭제 함수
 window.deleteData = async (col, id) => {
     if (confirm("삭제하시겠습니까?")) await deleteDoc(doc(db, col, id));
 };

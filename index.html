@@ -8,6 +8,26 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 필터 바 스타일링 */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .filter-bar input { flex: 2; }
+        .filter-bar select { flex: 1; min-width: 120px; }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -34,6 +54,16 @@
                 </select>
                 <button id="addBuyerBtn">구매자 등록</button>
             </div>
+
+            <div class="filter-bar">
+                <input type="text" id="buyerSearch" placeholder="이름 또는 연락처로 검색...">
+                <select id="buyerSort">
+                    <option value="recent">최신순</option>
+                    <option value="name_asc">이름 (ㄱ-ㅎ)</option>
+                    <option value="grade_desc">등급 (S-C)</option>
+                </select>
+            </div>
+
             <table>
                 <thead>
                     <tr><th>이름</th><th>연락처</th><th>등급</th><th>관리</th></tr>
@@ -51,6 +81,17 @@
                 <select id="buyerSelect"><option value="">구매자 연동</option></select>
                 <button id="addLizardBtn">개체 등록</button>
             </div>
+
+            <div class="filter-bar">
+                <input type="text" id="lizardSearch" placeholder="코드, 모프, 또는 소유주 검색...">
+                <select id="lizardSort">
+                    <option value="recent">최신순</option>
+                    <option value="morph_asc">모프 (A-Z)</option>
+                    <option value="unassigned">미분양 개체만</option>
+                    <option value="name_asc">소유주이름 순</option>
+                </select>
+            </div>
+
             <table>
                 <thead>
                     <tr><th>고유 코드</th><th>모프</th><th>부/모</th><th>소유주</th><th>관리</th></tr>
