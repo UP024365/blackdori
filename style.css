@@ -1,4 +1,4 @@
-/* --- 현대적인 심플 레이아웃 (반응형 및 가로 잘림 방지 수정) --- */
+/* --- 현대적인 심플 레이아웃 (가로 스크롤 완벽 방지 버전) --- */
 :root {
     --primary-color: #2563eb;    /* 메인 포인트 블루 */
     --bg-color: #f8fafc;         /* 전체 배경 회색 */
@@ -10,29 +10,33 @@
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
+/* 모든 요소의 기본 여백 제거 및 박스 모델 설정 */
 * {
-    box-sizing: border-box;      /* 패딩이 너비에 영향을 주지 않도록 설정 (잘림 방지 핵심) */
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-main);
-    margin: 0;
-    padding: 10px;               /* 모바일 여백 */
+    padding: 20px;               /* 전체 외곽 여백 */
     line-height: 1.6;
+    overflow-x: hidden;          /* 브라우저 전체 가로 스크롤 방지 */
 }
 
 .admin-container {
-    /* 수정: 고정 너비 대신 화면 비율(95%)을 사용하고 최대치를 제한 */
-    width: 95%;
-    max-width: 1300px; 
-    margin: 20px auto;
+    width: 100%;                 /* 화면에 맞춰 꽉 채움 */
+    max-width: 1400px;           /* 너무 퍼지는 것만 방지 */
+    margin: 0 auto;
     background: var(--card-bg);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    overflow: hidden;
     border: 1px solid var(--border-color);
+    overflow: hidden;            /* 내부 요소 돌출 방지 */
+    display: flex;
+    flex-direction: column;
 }
 
 /* --- 헤더 스타일 --- */
@@ -43,7 +47,7 @@ header {
     padding: 20px 24px;
     background: white;
     border-bottom: 1px solid var(--border-color);
-    flex-wrap: wrap;             /* 좁은 화면에서 로고와 버튼이 겹치지 않게 */
+    flex-wrap: wrap;
     gap: 10px;
 }
 
@@ -52,7 +56,6 @@ header h1 {
     font-weight: 800;
     color: var(--primary-color);
     letter-spacing: -0.02em;
-    margin: 0;
 }
 
 /* --- 메인 탭 메뉴 --- */
@@ -61,12 +64,10 @@ header h1 {
     background: #f1f5f9;
     padding: 6px;
     gap: 4px;
-    overflow-x: auto;            /* 탭이 너무 많으면 가로로 스크롤 가능하게 */
 }
 
 .tab-menu button {
     flex: 1;
-    min-width: 100px;            /* 탭이 너무 뭉개지지 않게 */
     padding: 12px;
     border: none;
     background: transparent;
@@ -75,7 +76,7 @@ header h1 {
     color: var(--text-muted);
     border-radius: 8px;
     transition: all 0.2s ease;
-    white-space: nowrap;         /* 텍스트 줄바꿈 방지 */
+    white-space: nowrap;
 }
 
 .tab-menu button.active {
@@ -87,7 +88,6 @@ header h1 {
 /* --- 입력 영역 (반응형 그리드) --- */
 .input-section {
     display: grid;
-    /* 수정: 화면이 좁아지면 칸이 자동으로 줄어들거나 아래로 내려감 */
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     padding: 20px;
@@ -96,7 +96,7 @@ header h1 {
 }
 
 input, select {
-    width: 100%;                 /* 그리드 너비에 꽉 맞춤 */
+    width: 100%;
     padding: 12px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -111,45 +111,42 @@ input, select {
     padding: 12px 20px;
     background: white;
     border-bottom: 1px solid var(--border-color);
-    flex-wrap: wrap;             /* 검색창과 정렬창이 좁으면 아래로 내려감 */
+    flex-wrap: wrap;
 }
 
-/* --- 표(Table) 잘림 방지 처리 --- */
+/* --- 표(Table) 잘림 방지 및 스크롤 최적화 --- */
 .content-section {
     width: 100%;
-    overflow-x: auto;            /* 표가 화면보다 넓어지면 표 안에서만 스크롤 발생 */
+    overflow-x: auto;            /* 표가 넓을 때만 내부 스크롤 발생 */
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 700px;            /* 데이터 보호를 위한 최소 너비 */
+    /* 고정된 min-width를 제거하여 부모 너비에 맞게 압축되도록 함 */
 }
 
 th, td {
     padding: 14px;
     text-align: center;
     border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;         /* 데이터 가독성을 위해 줄바꿈 방지 */
 }
 
-/* --- 카페 및 컨테이너 스타일 --- */
+/* --- 카페 및 컨테이너 스타일 (가로 스크롤 제거 핵심) --- */
 .cafe-container {
-    margin: 20px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    background: white;
-    border: 1px solid var(--border-color);
+    width: 100%;                 /* 부모 너비를 절대 넘지 않음 */
+    margin: 0;                   /* 외곽 마진 제거로 꽉 채움 */
     display: flex;
     flex-direction: column;
-    height: 75vh;                /* 높이를 화면 비율로 설정 */
-    min-height: 600px;
+    height: 80vh;                /* 화면 높이에 맞춤 */
 }
 
 .cafe-container iframe {
-    width: 100%;
-    flex: 1;                     /* 헤더 제외 남은 공간 가득 채움 */
+    width: 100%;                 /* 가로 꽉 채움 */
+    height: 100%;                /* 세로 꽉 채움 */
     border: none;
-    border-radius: 0 0 var(--radius) var(--radius);
+    min-width: 0;                /* 핵심: 최소 너비 제한 해제 */
 }
 
 /* --- 버튼 스타일 --- */
@@ -159,6 +156,8 @@ th, td {
     border: none;
     padding: 12px;
     font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 8px;
 }
 
 /* --- 등급별 뱃지 --- */
@@ -175,7 +174,10 @@ th, td {
 .grade-B { background-color: #dbeafe; color: #1e40af; }
 .grade-C { background-color: #f1f5f9; color: #475569; }
 
+/* 모바일 대응 */
 @media (max-width: 600px) {
-    .admin-container { width: 100%; margin: 0; border-radius: 0; }
+    body { padding: 5px; }
+    .admin-container { border-radius: 0; border: none; }
+    header { padding: 15px; }
     .input-section { grid-template-columns: 1fr; }
 }
