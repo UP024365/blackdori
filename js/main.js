@@ -159,35 +159,40 @@ if (addLizardBtn) {
 
         try {
             const snap = await getDocs(collection(db, "lizards"));
-            // 번호를 직접 입력했으면 그 번호를 쓰고, 아니면 자동(현재 개수+1) 부여
-            const lizardNum = lizardNumInput || (snap.size + 1);
+            // 번호를 입력하지 않았을 경우에만 자동 부여 (현재 전체 개수 + 1)
+            const lizardNum = lizardNumInput || (snap.size + 1).toString();
             const fullCode = `${yearPrefix}${morph} ${lizardNum}/${fId}/${mId}`;
 
             if (editingLizardId) {
-                // 수정 시에는 번호까지 포함하여 업데이트
+                // 수정 모드: 수정 중인 본인의 번호는 제외하고 다른 개체와 번호가 겹치는지 확인
+                const isDuplicateNum = snap.docs.some(doc => 
+                    doc.id !== editingLizardId && String(doc.data().lizardNum) === String(lizardNum)
+                );
+
+                if (isDuplicateNum) {
+                    return alert(`이미 사용 중인 번호입니다: [${lizardNum}]번\n다른 번호를 입력해주세요.`);
+                }
+
                 await updateDoc(doc(db, "lizards", editingLizardId), {
-                    code: fullCode, 
-                    yearPrefix, 
-                    morph, 
-                    lizardNum,
-                    parents: { father: fId, mother: mId }, 
-                    owner
+                    code: fullCode, yearPrefix, morph, lizardNum, 
+                    parents: { father: fId, mother: mId }, owner
                 });
                 alert("개체 정보가 수정되었습니다.");
                 editingLizardId = null;
                 addLizardBtn.innerText = "개체 등록";
             } else {
-                // 중복 방지 체크
-                const isDuplicate = snap.docs.some(doc => doc.data().code === fullCode);
-                if (isDuplicate) {
-                    return alert("이미 등록된 고유 코드입니다: " + fullCode);
+                // 신규 등록: 전체 데이터 중 입력한 번호(lizardNum)가 이미 존재하는지 확인
+                const isDuplicateNum = snap.docs.some(doc => String(doc.data().lizardNum) === String(lizardNum));
+                
+                if (isDuplicateNum) {
+                    return alert(`이미 사용 중인 번호입니다: [${lizardNum}]번\n번호는 중복될 수 없습니다.`);
                 }
 
                 await addDoc(collection(db, "lizards"), {
                     code: fullCode, 
                     yearPrefix, 
                     morph, 
-                    lizardNum,
+                    lizardNum, 
                     parents: { father: fId, mother: mId },
                     owner, 
                     timestamp: serverTimestamp()
