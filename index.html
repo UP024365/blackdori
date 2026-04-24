@@ -101,12 +101,14 @@
         </section>
 
         <section id="marketSection" class="content-section">
-            <div class="cafe-link-card">
-                <h2>파충류 매니아 카페</h2>
-                <p>최신 분양글과 시세 정보를 카페에서 확인하세요.</p>
-                <button onclick="window.open('https://cafe.naver.com/reptilia', '_blank')" class="go-cafe-btn">
-                    카페 방문하기 ↗
-                </button>
+            <div class="cafe-container" style="width: 100%; height: 600px; border: 2px solid #111; background: #fff;">
+                <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #eee; background: #f8fafc;">
+                    <h2 style="font-size: 1rem; margin: 0;">파충류 매니아 카페</h2>
+                    <button onclick="window.open('https://cafe.naver.com/reptilia', '_blank')" style="padding: 5px 10px; font-size: 0.8rem; background: #111; color: #fff; border: none; cursor: pointer;">
+                        새 창으로 열기 ↗
+                    </button>
+                </header>
+                <iframe src="https://cafe.naver.com/reptilia" style="width: 100%; height: calc(100% - 45px); border: none;"></iframe>
             </div>
         </section>
     </div>
